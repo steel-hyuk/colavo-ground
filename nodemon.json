@@ -1,0 +1,6 @@
+{
+  "watch": ["src", "src/**/**/*.graphql"],
+  "ext": "ts",
+  "ignore": ["src/**/*.spec.ts"],
+  "exec": "ts-node ./src/main.ts"
+}
