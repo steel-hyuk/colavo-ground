@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import dayjs from 'dayjs';
-import timezone from 'dayjs/plugin/timezone';
 import { RequestBody, ResponseBody, DayTimetable, Timeslot, Events, WorkHours, Schedule } from './types';
 import { ErrorMessage } from './error';
 
 import eventsData from './events.json';
 import workhoursData from './workhours.json';
 
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 dayjs.extend(timezone);
+dayjs.extend(utc);
 
 @Injectable()
 export class AppService {
@@ -28,7 +30,7 @@ export class AppService {
     }
 
     // 시작일의 Unixstamp
-    const start_of_entire_day = this.toUnixstampDate(start_day_identifier);
+    const start_of_entire_day = this.toUnixstampDate(start_day_identifier, timezone_identifier);
 
     // 각 날짜의 시작 시간(start_of_day)를 담은 배열
     const start_time_of_each_day = this.getStartTimeOfEachDay(start_of_entire_day, days);
@@ -39,9 +41,10 @@ export class AppService {
     });
   }
 
-  // YYYYMMDD 형식의 날짜를 Unixstamp number로 변환
-  toUnixstampDate(date: string): number {
-    return dayjs(date, 'YYYYMMDD').unix();
+  // YYYYMMDD 형식의 날짜를 tz에 맞는 Unixstamp number로 변환
+  toUnixstampDate(date: string, timezone_identifier: string): number {
+    const tzTime = dayjs.tz(date, 'YYYYMMDD', timezone_identifier).utc().format('YYYYMMDDHHmmss');
+    return dayjs(tzTime, 'YYYYMMDDHHmmss').unix();
   }
 
   // Unixstamp 날짜 정보에서 요일 정보를 추출
